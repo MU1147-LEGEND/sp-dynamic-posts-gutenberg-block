@@ -60,19 +60,35 @@ function Edit({
       _embed: displayFeaturedImage
     });
   }, [numberOfPosts]);
+  const imageSizes = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => select("core/block-editor").getSettings()?.imageSizes, []);
+  const imageSizeOptions = imageSizes.map(size => ({
+    label: size.name,
+    value: size.slug
+  }));
+  const onChangeImageSize = newSize => {
+    setAttributes({
+      imageSize: newSize
+    });
+  };
   const onChangeNumberOfPosts = newNum => {
     setAttributes({
       numberOfPosts: newNum
     });
   };
-  const imageSizes = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => select("core/block-editor").getSettings()?.imageSizes, []);
-  console.log(imageSizes);
-  console.log(posts);
+  const handleDisplayFeaturedImageChange = value => {
+    setAttributes({
+      displayFeaturedImage: value
+    });
+  };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("ul", {
     ...(0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps)(),
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InspectorControls, {
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.PanelBody, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalNumberControl, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Display Featured Image", "sp-dynamic-posts"),
+          checked: displayFeaturedImage,
+          onChange: handleDisplayFeaturedImageChange
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalNumberControl, {
           value: numberOfPosts,
           min: 1,
           max: 20,
@@ -81,25 +97,18 @@ function Edit({
           onChange: onChangeNumberOfPosts
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Image Size", "sp-dynamic-posts"),
-          options: [{
-            label: "A",
-            value: "a"
-          }, {
-            label: "B",
-            value: "b"
-          }, {
-            label: "C",
-            value: "c"
-          }],
-          value: "a"
+          options: imageSizeOptions,
+          value: imageSize,
+          onChange: onChangeImageSize
         })]
       })
     }), posts && posts?.map(post => {
       const title = post?.title?.rendered;
-      const featuredImage = post?._embedded?.["wp:featuredmedia"]?.[0];
+      const featuredImage = post._embedded && post._embedded["wp:featuredmedia"] && post._embedded["wp:featuredmedia"].length > 0 && post._embedded["wp:featuredmedia"][0];
+      console.log(featuredImage);
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("li", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("img", {
-          src: featuredImage?.media_details.sizes[imageSize].source_url,
+        children: [displayFeaturedImage && featuredImage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("img", {
+          src: featuredImage?.media_details?.sizes?.[imageSize]?.source_url || featuredImage?.source_url,
           alt: featuredImage?.alt_text
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("h3", {
           children: [" ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {

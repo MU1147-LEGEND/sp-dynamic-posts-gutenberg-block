@@ -3,6 +3,7 @@ import {
 	__experimentalNumberControl,
 	PanelBody,
 	SelectControl,
+	ToggleControl,
 } from "@wordpress/components";
 import { useSelect } from "@wordpress/data";
 import { dateI18n, format, getSettings } from "@wordpress/date";
@@ -22,22 +23,37 @@ export default function Edit({ attributes, setAttributes }) {
 		[numberOfPosts],
 	);
 
-	const onChangeNumberOfPosts = (newNum) => {
-		setAttributes({ numberOfPosts: newNum });
-	};
-
 	const imageSizes = useSelect(
 		(select) => select("core/block-editor").getSettings()?.imageSizes,
 		[],
 	);
 
-	console.log(imageSizes);
-	console.log(posts);
+	const imageSizeOptions = imageSizes.map((size) => ({
+		label: size.name,
+		value: size.slug,
+	}));
+
+	const onChangeImageSize = (newSize) => {
+		setAttributes({ imageSize: newSize });
+	};
+
+	const onChangeNumberOfPosts = (newNum) => {
+		setAttributes({ numberOfPosts: newNum });
+	};
+
+	const handleDisplayFeaturedImageChange = (value) => {
+		setAttributes({ displayFeaturedImage: value });
+	};
 
 	return (
 		<ul {...useBlockProps()}>
 			<InspectorControls>
 				<PanelBody>
+					<ToggleControl
+						label={__("Display Featured Image", "sp-dynamic-posts")}
+						checked={displayFeaturedImage}
+						onChange={handleDisplayFeaturedImageChange}
+					/>
 					<__experimentalNumberControl
 						value={numberOfPosts}
 						min={1}
@@ -49,12 +65,9 @@ export default function Edit({ attributes, setAttributes }) {
 
 					<SelectControl
 						label={__("Image Size", "sp-dynamic-posts")}
-						options={[
-							{ label: "A", value: "a" },
-							{ label: "B", value: "b" },
-							{ label: "C", value: "c" },
-						]}
-						value={"a"}
+						options={imageSizeOptions}
+						value={imageSize}
+						onChange={onChangeImageSize}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -62,13 +75,25 @@ export default function Edit({ attributes, setAttributes }) {
 			{posts &&
 				posts?.map((post) => {
 					const title = post?.title?.rendered;
-					const featuredImage = post?._embedded?.["wp:featuredmedia"]?.[0];
+					const featuredImage =
+						post._embedded &&
+						post._embedded["wp:featuredmedia"] &&
+						post._embedded["wp:featuredmedia"].length > 0 &&
+						post._embedded["wp:featuredmedia"][0];
+
+					console.log(featuredImage);
+
 					return (
 						<li key={post.id}>
-							<img
-								src={featuredImage?.media_details.sizes[imageSize].source_url}
-								alt={featuredImage?.alt_text}
-							/>
+							{displayFeaturedImage && featuredImage && (
+								<img
+									src={
+										featuredImage?.media_details?.sizes?.[imageSize]
+											?.source_url || featuredImage?.source_url
+									}
+									alt={featuredImage?.alt_text}
+								/>
+							)}
 							<h3>
 								{" "}
 								<a href={post.link}>

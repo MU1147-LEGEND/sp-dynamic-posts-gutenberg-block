@@ -48,7 +48,7 @@ function render_sp_dynamic_posts_block($attributes)
 		$posts .= "<li>";
 
 		if ($attributes['displayFeaturedImage'] && has_post_thumbnail($post)) {
-			$posts .= get_the_post_thumbnail($post, 'thumbnail');
+			$posts .= get_the_post_thumbnail($post, $attributes['imageSize']);
 		}
 
 		$posts .= "<h3> <a href=" . esc_url($permalink) . ">" . $title . " </a> </h3>";
