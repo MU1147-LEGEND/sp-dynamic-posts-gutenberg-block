@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "create-block/sp-dynamic-posts",
+  "version": "0.1.0",
+  "title": "Sp Dynamic Posts",
+  "category": "widgets",
+  "icon": "format-aside",
+  "description": "A block to display dynamic posts.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "textdomain": "sp-dynamic-posts",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js",
+  "attributes": {
+    "numberOfPosts": {
+      "type": "number",
+      "default": 5
+    },
+    "displayFeaturedImage": {
+      "type": "boolean",
+      "default": true
+    },
+    "imageSize": {
+      "type": "string",
+      "default": "thumbnail"
+    }
+  }
+}
