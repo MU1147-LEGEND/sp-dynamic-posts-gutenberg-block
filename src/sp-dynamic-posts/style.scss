@@ -3,16 +3,24 @@ ul.wp-block-create-block-sp-dynamic-posts {
 	padding: 0;
 	margin: 0;
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
+	grid-template-columns: repeat(2, 1fr);
 
 	li {
+		background-color: rgba(188, 188, 188, 0.115);
+		margin: 8px;
+		padding: 4px;
 		img {
 			margin-bottom: 10px;
+			object-fit: contain;
+			max-width: 100%;
+			max-height: fit-content;
 		}
 		h3 {
-			font-size: 20px;
+			font-size: 24px;
 			margin: 0 0 5px;
 			line-height: 1.4;
+			font-weight: 700;
 		}
 		a {
 			text-decoration: none;
@@ -27,6 +35,17 @@ ul.wp-block-create-block-sp-dynamic-posts {
 			color: #303030;
 			line-height: 1.6;
 			margin: 15px 0 0;
+			a {
+				text-decoration: underline;
+				&:hover {
+					text-decoration: none;
+					color: #6666ff;
+				}
+				&.sp-read-more {
+					margin-left: 6px;
+					font-weight: 600;
+				}
+			}
 		}
 	}
 }

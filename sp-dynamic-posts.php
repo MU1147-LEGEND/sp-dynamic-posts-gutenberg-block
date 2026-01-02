@@ -48,19 +48,34 @@ function render_sp_dynamic_posts_block($attributes)
 		} else {
 			$title = esc_html($title);
 		}
+
+		$content = get_the_content(null, false, $post);
+		$plain_content = wp_strip_all_tags($content);
+		$excerpt_length = $attributes['excerptLength'] ?? 20;
+		$excerpt = get_the_excerpt($post);
+		if ($excerpt_length > 0 && $excerpt) {
+			$excerpt = wp_trim_words($excerpt, $excerpt_length, "...");
+			$excerpt = esc_html($excerpt);
+		}
+
 		$permalink = get_the_permalink($post);
-		$excerpt = esc_html(get_the_excerpt($post));
 
 		$posts .= "<li>";
+
+		$posts .= "<h3> <a href=" . esc_url($permalink) . ">" . $title . " </a> </h3>";
+		$posts .= "<time datetime=" . esc_attr(get_the_date('c', $post)) . ">" . get_the_date("", $post) . "</time>";
 
 		if ($attributes['displayFeaturedImage'] && has_post_thumbnail($post)) {
 			$posts .= get_the_post_thumbnail($post, $attributes['imageSize']);
 		}
 
-		$posts .= "<h3> <a href=" . esc_url($permalink) . ">" . $title . " </a> </h3>";
-		$posts .= "<time datetime=" . esc_attr(get_the_date('c', $post)) . ">" . get_the_date("", $post) . "</time>";
 		if (!empty($excerpt)) {
-			$posts .= "<p>$excerpt</p>";
+			$posts .= "<p>$excerpt";
+
+			if (str_word_count($plain_content) > $excerpt_length) {
+				$posts .= "<a class='sp-read-more' href=" . $permalink . ">Read more</a>";
+			}
+			$posts .= "</p>";
 		}
 		$posts .= "</li>";
 	}

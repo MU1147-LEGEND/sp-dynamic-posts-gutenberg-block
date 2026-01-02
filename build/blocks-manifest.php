@@ -14,7 +14,11 @@ return array(
 			
 		),
 		'supports' => array(
-			'html' => false
+			'html' => false,
+			'align' => array(
+				'wide',
+				'full'
+			)
 		),
 		'textdomain' => 'sp-dynamic-posts',
 		'editorScript' => 'file:./index.js',
@@ -43,8 +47,15 @@ return array(
 				'default' => 'asc'
 			),
 			'category' => array(
+				'type' => 'number'
+			),
+			'excerptLength' => array(
 				'type' => 'number',
-				'default' => 1
+				'default' => 20
+			),
+			'showDate' => array(
+				'type' => 'boolean',
+				'default' => true
 			)
 		)
 	)

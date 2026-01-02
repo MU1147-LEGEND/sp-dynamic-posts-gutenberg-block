@@ -1,1 +1,23 @@
+ul.wp-block-create-block-sp-dynamic-posts {
+	padding: 0 -8px;
+	li {
+		background-color: rgba(188, 188, 188, 0.115);
+		margin: 8px;
+		padding: 4px;
+		img {
+			margin-bottom: 10px;
+			object-fit: contain;
+			max-width: 100%;
+			max-height: fit-content;
+		}
 
+		div {
+			p {
+				span {
+                    margin-left: 6px;
+					font-weight: 600;
+				}
+			}
+		}
+	}
+}

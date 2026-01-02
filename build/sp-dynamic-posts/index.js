@@ -8,7 +8,7 @@
   \*****************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/sp-dynamic-posts","version":"0.1.0","title":"Sp Dynamic Posts","category":"widgets","icon":"format-aside","description":"A block to display dynamic posts.","example":{},"supports":{"html":false},"textdomain":"sp-dynamic-posts","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"numberOfPosts":{"type":"number","default":5},"displayFeaturedImage":{"type":"boolean","default":true},"imageSize":{"type":"string","default":"thumbnail"},"orderBy":{"type":"string","default":"date"},"order":{"type":"string","default":"asc"},"category":{"type":"number","default":1}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/sp-dynamic-posts","version":"0.1.0","title":"Sp Dynamic Posts","category":"widgets","icon":"format-aside","description":"A block to display dynamic posts.","example":{},"supports":{"html":false,"align":["wide","full"]},"textdomain":"sp-dynamic-posts","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"numberOfPosts":{"type":"number","default":5},"displayFeaturedImage":{"type":"boolean","default":true},"imageSize":{"type":"string","default":"thumbnail"},"orderBy":{"type":"string","default":"date"},"order":{"type":"string","default":"asc"},"category":{"type":"number"},"excerptLength":{"type":"number","default":20},"showDate":{"type":"boolean","default":true}}}');
 
 /***/ },
 
@@ -45,6 +45,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
 function Edit({
   attributes,
   setAttributes
@@ -55,7 +57,9 @@ function Edit({
     imageSize,
     order,
     orderBy,
-    category
+    category,
+    excerptLength,
+    showDate
   } = attributes;
   const posts = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => {
     return select("core").getEntityRecords("postType", "post", {
@@ -63,7 +67,9 @@ function Edit({
       _embed: displayFeaturedImage,
       order,
       orderby: orderBy,
-      categories: [category]
+      ...(category ? {
+        categories: category
+      } : {})
     });
   }, [numberOfPosts, order, orderBy, category]);
   const imageSizes = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => select("core/block-editor").getSettings()?.imageSizes, []);
@@ -86,7 +92,7 @@ function Edit({
   };
   const onChangeNumberOfPosts = newNum => {
     setAttributes({
-      numberOfPosts: newNum
+      numberOfPosts: Number(newNum)
     });
   };
   const handleDisplayFeaturedImageChange = value => {
@@ -106,7 +112,17 @@ function Edit({
   };
   const handleOnCategoryChange = newCategory => {
     setAttributes({
-      category: Number(newCategory)
+      category: Number(newCategory) || 0
+    });
+  };
+  const handleToggleShowDate = value => {
+    setAttributes({
+      showDate: value
+    });
+  };
+  const onChangeExcerptLength = newLength => {
+    setAttributes({
+      excerptLength: newLength
     });
   };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("ul", {
@@ -117,6 +133,10 @@ function Edit({
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Display Featured Image", "sp-dynamic-posts"),
           checked: displayFeaturedImage,
           onChange: handleDisplayFeaturedImageChange
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.ToggleControl, {
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Show date", "sp-dynamic-posts"),
+          checked: showDate,
+          onChange: handleToggleShowDate
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalNumberControl, {
           value: numberOfPosts,
           min: 1,
@@ -130,34 +150,43 @@ function Edit({
           onOrderChange: handleOrderChange,
           onOrderByChange: handleOrderByChange,
           categoriesList: categoriesList,
-          selectedCategoryId: category,
+          selectedCategoryId: category || "",
           onCategoryChange: handleOnCategoryChange
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
-          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Image Size", "sp-dynamic-posts"),
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Image size", "sp-dynamic-posts"),
           options: imageSizeOptions,
           value: imageSize,
           onChange: onChangeImageSize
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.__experimentalNumberControl, {
+          value: excerptLength,
+          min: 8,
+          max: 60,
+          label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Excerpt Length", "sp-dynamic-posts"),
+          placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Post's content length", "sp-dynamic-posts"),
+          onChange: onChangeExcerptLength
         })]
       })
     }), posts && posts?.map(post => {
       const title = post?.title?.rendered;
       const featuredImage = post._embedded && post._embedded["wp:featuredmedia"] && post._embedded["wp:featuredmedia"].length > 0 && post._embedded["wp:featuredmedia"][0];
+      const excerptText = post.excerpt.rendered.split(" ").splice(0, excerptLength).join(" ");
+      const contentLn = post.content.rendered.split(" ").length;
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("li", {
-        children: [displayFeaturedImage && featuredImage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("img", {
-          src: featuredImage?.media_details?.sizes?.[imageSize]?.source_url || featuredImage?.source_url,
-          alt: featuredImage?.alt_text
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("h3", {
           children: [" ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
             href: post.link,
             children: title ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.RawHTML, {
               children: title
             }) : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("No title", "sp-dynamic-posts")
           }), " "]
-        }), post.date_gmt && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("time", {
+        }), showDate && post.date_gmt && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("time", {
           dateTime: (0,_wordpress_date__WEBPACK_IMPORTED_MODULE_3__.format)("c", post.date_gmt),
           children: (0,_wordpress_date__WEBPACK_IMPORTED_MODULE_3__.dateI18n)((0,_wordpress_date__WEBPACK_IMPORTED_MODULE_3__.getSettings)().formats.date, post.date_gmt)
-        }), post.excerpt.rendered && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.RawHTML, {
-          children: post.excerpt.rendered
+        }), displayFeaturedImage && featuredImage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("img", {
+          src: featuredImage?.media_details?.sizes?.[imageSize]?.source_url || featuredImage?.source_url,
+          alt: featuredImage?.alt_text
+        }), post.excerpt.rendered && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.RawHTML, {
+          children: [excerptText, " ", contentLn > excerptLength ? "<span className='sp-read-more'>...Read more</span>" : ""]
         })]
       }, post.id);
     })]

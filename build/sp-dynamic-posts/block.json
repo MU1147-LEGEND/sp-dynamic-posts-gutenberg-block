@@ -9,7 +9,11 @@
   "description": "A block to display dynamic posts.",
   "example": {},
   "supports": {
-    "html": false
+    "html": false,
+    "align": [
+      "wide",
+      "full"
+    ]
   },
   "textdomain": "sp-dynamic-posts",
   "editorScript": "file:./index.js",
@@ -38,8 +42,15 @@
       "default": "asc"
     },
     "category": {
+      "type": "number"
+    },
+    "excerptLength": {
       "type": "number",
-      "default": 1
+      "default": 20
+    },
+    "showDate": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

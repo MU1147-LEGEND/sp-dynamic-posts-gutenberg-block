@@ -7,10 +7,12 @@ import {
 	ToggleControl,
 } from "@wordpress/components";
 import { useSelect } from "@wordpress/data";
-import { date, dateI18n, format, getSettings } from "@wordpress/date";
+import { dateI18n, format, getSettings } from "@wordpress/date";
 import { RawHTML } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import "./editor.scss";
+import { TextareaControl } from "@wordpress/components";
+import { TextControl } from "@wordpress/components";
 
 export default function Edit({ attributes, setAttributes }) {
 	const {
@@ -20,6 +22,8 @@ export default function Edit({ attributes, setAttributes }) {
 		order,
 		orderBy,
 		category,
+		excerptLength,
+		showDate,
 	} = attributes;
 
 	const posts = useSelect(
@@ -29,7 +33,7 @@ export default function Edit({ attributes, setAttributes }) {
 				_embed: displayFeaturedImage,
 				order,
 				orderby: orderBy,
-				categories: [category],
+				...(category ? { categories: category } : {}),
 			});
 		},
 		[numberOfPosts, order, orderBy, category],
@@ -61,7 +65,7 @@ export default function Edit({ attributes, setAttributes }) {
 	};
 
 	const onChangeNumberOfPosts = (newNum) => {
-		setAttributes({ numberOfPosts: newNum });
+		setAttributes({ numberOfPosts: Number(newNum) });
 	};
 
 	const handleDisplayFeaturedImageChange = (value) => {
@@ -76,7 +80,15 @@ export default function Edit({ attributes, setAttributes }) {
 	};
 
 	const handleOnCategoryChange = (newCategory) => {
-		setAttributes({ category: Number(newCategory) });
+		setAttributes({ category: Number(newCategory) || 0 });
+	};
+
+	const handleToggleShowDate = (value) => {
+		setAttributes({ showDate: value });
+	};
+
+	const onChangeExcerptLength = (newLength) => {
+		setAttributes({ excerptLength: newLength });
 	};
 
 	return (
@@ -87,6 +99,11 @@ export default function Edit({ attributes, setAttributes }) {
 						label={__("Display Featured Image", "sp-dynamic-posts")}
 						checked={displayFeaturedImage}
 						onChange={handleDisplayFeaturedImageChange}
+					/>
+					<ToggleControl
+						label={__("Show date", "sp-dynamic-posts")}
+						checked={showDate}
+						onChange={handleToggleShowDate}
 					/>
 					<__experimentalNumberControl
 						value={numberOfPosts}
@@ -103,15 +120,24 @@ export default function Edit({ attributes, setAttributes }) {
 						onOrderChange={handleOrderChange}
 						onOrderByChange={handleOrderByChange}
 						categoriesList={categoriesList}
-						selectedCategoryId={category}
+						selectedCategoryId={category || ""}
 						onCategoryChange={handleOnCategoryChange}
 					/>
 
 					<SelectControl
-						label={__("Image Size", "sp-dynamic-posts")}
+						label={__("Image size", "sp-dynamic-posts")}
 						options={imageSizeOptions}
 						value={imageSize}
 						onChange={onChangeImageSize}
+					/>
+
+					<__experimentalNumberControl
+						value={excerptLength}
+						min={8}
+						max={60}
+						label={__("Excerpt Length", "sp-dynamic-posts")}
+						placeholder={__("Post's content length", "sp-dynamic-posts")}
+						onChange={onChangeExcerptLength}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -125,17 +151,14 @@ export default function Edit({ attributes, setAttributes }) {
 						post._embedded["wp:featuredmedia"].length > 0 &&
 						post._embedded["wp:featuredmedia"][0];
 
+					const excerptText = post.excerpt.rendered
+						.split(" ")
+						.splice(0, excerptLength)
+						.join(" ");
+					const contentLn = post.content.rendered.split(" ").length;
+
 					return (
 						<li key={post.id}>
-							{displayFeaturedImage && featuredImage && (
-								<img
-									src={
-										featuredImage?.media_details?.sizes?.[imageSize]
-											?.source_url || featuredImage?.source_url
-									}
-									alt={featuredImage?.alt_text}
-								/>
-							)}
 							<h3>
 								{" "}
 								<a href={post.link}>
@@ -146,14 +169,29 @@ export default function Edit({ attributes, setAttributes }) {
 									)}
 								</a>{" "}
 							</h3>
-							{post.date_gmt && (
+							{showDate && post.date_gmt && (
 								<time dateTime={format("c", post.date_gmt)}>
 									{dateI18n(getSettings().formats.date, post.date_gmt)}
 								</time>
 							)}
 
+							{displayFeaturedImage && featuredImage && (
+								<img
+									src={
+										featuredImage?.media_details?.sizes?.[imageSize]
+											?.source_url || featuredImage?.source_url
+									}
+									alt={featuredImage?.alt_text}
+								/>
+							)}
+
 							{post.excerpt.rendered && (
-								<RawHTML>{post.excerpt.rendered}</RawHTML>
+								<RawHTML>
+									{excerptText}{" "}
+									{contentLn > excerptLength
+										? "<span className='sp-read-more'>...Read more</span>"
+										: ""}
+								</RawHTML>
 							)}
 						</li>
 					);
