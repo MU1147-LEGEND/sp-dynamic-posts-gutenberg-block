@@ -33,6 +33,14 @@ return array(
 			'imageSize' => array(
 				'type' => 'string',
 				'default' => 'thumbnail'
+			),
+			'orderBy' => array(
+				'type' => 'string',
+				'default' => 'date'
+			),
+			'order' => array(
+				'type' => 'string',
+				'default' => 'asc'
 			)
 		)
 	)

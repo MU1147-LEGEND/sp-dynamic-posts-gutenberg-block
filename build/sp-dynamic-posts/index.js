@@ -8,7 +8,7 @@
   \*****************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/sp-dynamic-posts","version":"0.1.0","title":"Sp Dynamic Posts","category":"widgets","icon":"format-aside","description":"A block to display dynamic posts.","example":{},"supports":{"html":false},"textdomain":"sp-dynamic-posts","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"numberOfPosts":{"type":"number","default":5},"displayFeaturedImage":{"type":"boolean","default":true},"imageSize":{"type":"string","default":"thumbnail"}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/sp-dynamic-posts","version":"0.1.0","title":"Sp Dynamic Posts","category":"widgets","icon":"format-aside","description":"A block to display dynamic posts.","example":{},"supports":{"html":false},"textdomain":"sp-dynamic-posts","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"numberOfPosts":{"type":"number","default":5},"displayFeaturedImage":{"type":"boolean","default":true},"imageSize":{"type":"string","default":"thumbnail"},"orderBy":{"type":"string","default":"date"},"order":{"type":"string","default":"asc"}}}');
 
 /***/ },
 
@@ -52,14 +52,18 @@ function Edit({
   const {
     numberOfPosts,
     displayFeaturedImage,
-    imageSize
+    imageSize,
+    order,
+    orderBy
   } = attributes;
   const posts = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => {
     return select("core").getEntityRecords("postType", "post", {
       per_page: numberOfPosts,
-      _embed: displayFeaturedImage
+      _embed: displayFeaturedImage,
+      order,
+      orderby: orderBy
     });
-  }, [numberOfPosts]);
+  }, [numberOfPosts, order, orderBy]);
   const imageSizes = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => select("core/block-editor").getSettings()?.imageSizes, []);
   const imageSizeOptions = imageSizes.map(size => ({
     label: size.name,
@@ -80,6 +84,16 @@ function Edit({
       displayFeaturedImage: value
     });
   };
+  const handleOrderByChange = newOrderBy => {
+    setAttributes({
+      orderBy: newOrderBy
+    });
+  };
+  const handleOrderChange = newOrder => {
+    setAttributes({
+      order: newOrder
+    });
+  };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("ul", {
     ...(0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps)(),
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InspectorControls, {
@@ -95,6 +109,11 @@ function Edit({
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Number of posts", "sp-dynamic-posts"),
           placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("How many posts to show", "sp-dynamic-posts"),
           onChange: onChangeNumberOfPosts
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.QueryControls, {
+          order: order,
+          orderBy: orderBy,
+          onOrderChange: handleOrderChange,
+          onOrderByChange: handleOrderByChange
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Image Size", "sp-dynamic-posts"),
           options: imageSizeOptions,
@@ -105,7 +124,6 @@ function Edit({
     }), posts && posts?.map(post => {
       const title = post?.title?.rendered;
       const featuredImage = post._embedded && post._embedded["wp:featuredmedia"] && post._embedded["wp:featuredmedia"].length > 0 && post._embedded["wp:featuredmedia"][0];
-      console.log(featuredImage);
       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("li", {
         children: [displayFeaturedImage && featuredImage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("img", {
           src: featuredImage?.media_details?.sizes?.[imageSize]?.source_url || featuredImage?.source_url,

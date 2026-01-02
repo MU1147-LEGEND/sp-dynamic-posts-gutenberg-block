@@ -28,6 +28,14 @@
 		"imageSize": {
 			"type": "string",
 			"default": "thumbnail"
+		},
+		"orderBy": {
+			"type": "string",
+			"default": "date"
+		},
+		"order": {
+			"type": "string",
+			"default": "asc"
 		}
 	}
 }

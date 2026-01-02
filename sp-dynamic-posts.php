@@ -31,7 +31,7 @@ function create_block_sp_dynamic_posts_block_init()
 
 function render_sp_dynamic_posts_block($attributes)
 {
-	$arg = array('posts_per_page' => $attributes['numberOfPosts'], 'post_status' => 'publish');
+	$arg = array('posts_per_page' => $attributes['numberOfPosts'], 'post_status' => 'publish', 'order' => $attributes['order'], 'orderby' => $attributes['orderBy']);
 	$recent_posts = get_posts($arg);
 
 	$posts = "<ul " . get_block_wrapper_attributes() . ">";

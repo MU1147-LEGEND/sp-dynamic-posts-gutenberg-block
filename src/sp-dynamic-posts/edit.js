@@ -2,25 +2,30 @@ import { InspectorControls, useBlockProps } from "@wordpress/block-editor";
 import {
 	__experimentalNumberControl,
 	PanelBody,
+	QueryControls,
 	SelectControl,
 	ToggleControl,
 } from "@wordpress/components";
 import { useSelect } from "@wordpress/data";
-import { dateI18n, format, getSettings } from "@wordpress/date";
+import { date, dateI18n, format, getSettings } from "@wordpress/date";
 import { RawHTML } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import "./editor.scss";
 
 export default function Edit({ attributes, setAttributes }) {
-	const { numberOfPosts, displayFeaturedImage, imageSize } = attributes;
+	const { numberOfPosts, displayFeaturedImage, imageSize, order, orderBy } =
+		attributes;
+
 	const posts = useSelect(
 		(select) => {
 			return select("core").getEntityRecords("postType", "post", {
 				per_page: numberOfPosts,
 				_embed: displayFeaturedImage,
+				order,
+				orderby: orderBy,
 			});
 		},
-		[numberOfPosts],
+		[numberOfPosts, order, orderBy],
 	);
 
 	const imageSizes = useSelect(
@@ -45,6 +50,13 @@ export default function Edit({ attributes, setAttributes }) {
 		setAttributes({ displayFeaturedImage: value });
 	};
 
+	const handleOrderByChange = (newOrderBy) => {
+		setAttributes({ orderBy: newOrderBy });
+	};
+	const handleOrderChange = (newOrder) => {
+		setAttributes({ order: newOrder });
+	};
+
 	return (
 		<ul {...useBlockProps()}>
 			<InspectorControls>
@@ -61,6 +73,13 @@ export default function Edit({ attributes, setAttributes }) {
 						label={__("Number of posts", "sp-dynamic-posts")}
 						placeholder={__("How many posts to show", "sp-dynamic-posts")}
 						onChange={onChangeNumberOfPosts}
+					/>
+
+					<QueryControls
+						order={order}
+						orderBy={orderBy}
+						onOrderChange={handleOrderChange}
+						onOrderByChange={handleOrderByChange}
 					/>
 
 					<SelectControl
@@ -80,8 +99,6 @@ export default function Edit({ attributes, setAttributes }) {
 						post._embedded["wp:featuredmedia"] &&
 						post._embedded["wp:featuredmedia"].length > 0 &&
 						post._embedded["wp:featuredmedia"][0];
-
-					console.log(featuredImage);
 
 					return (
 						<li key={post.id}>
