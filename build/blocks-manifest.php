@@ -41,6 +41,10 @@ return array(
 			'order' => array(
 				'type' => 'string',
 				'default' => 'asc'
+			),
+			'category' => array(
+				'type' => 'number',
+				'default' => 1
 			)
 		)
 	)

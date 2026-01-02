@@ -8,7 +8,7 @@
   \*****************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/sp-dynamic-posts","version":"0.1.0","title":"Sp Dynamic Posts","category":"widgets","icon":"format-aside","description":"A block to display dynamic posts.","example":{},"supports":{"html":false},"textdomain":"sp-dynamic-posts","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"numberOfPosts":{"type":"number","default":5},"displayFeaturedImage":{"type":"boolean","default":true},"imageSize":{"type":"string","default":"thumbnail"},"orderBy":{"type":"string","default":"date"},"order":{"type":"string","default":"asc"}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"create-block/sp-dynamic-posts","version":"0.1.0","title":"Sp Dynamic Posts","category":"widgets","icon":"format-aside","description":"A block to display dynamic posts.","example":{},"supports":{"html":false},"textdomain":"sp-dynamic-posts","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js","attributes":{"numberOfPosts":{"type":"number","default":5},"displayFeaturedImage":{"type":"boolean","default":true},"imageSize":{"type":"string","default":"thumbnail"},"orderBy":{"type":"string","default":"date"},"order":{"type":"string","default":"asc"},"category":{"type":"number","default":1}}}');
 
 /***/ },
 
@@ -54,20 +54,30 @@ function Edit({
     displayFeaturedImage,
     imageSize,
     order,
-    orderBy
+    orderBy,
+    category
   } = attributes;
   const posts = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => {
     return select("core").getEntityRecords("postType", "post", {
       per_page: numberOfPosts,
       _embed: displayFeaturedImage,
       order,
-      orderby: orderBy
+      orderby: orderBy,
+      categories: [category]
     });
-  }, [numberOfPosts, order, orderBy]);
+  }, [numberOfPosts, order, orderBy, category]);
   const imageSizes = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => select("core/block-editor").getSettings()?.imageSizes, []);
   const imageSizeOptions = imageSizes.map(size => ({
     label: size.name,
     value: size.slug
+  }));
+  const categories = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => select("core").getEntityRecords("taxonomy", "category", {
+    per_page: -1
+  }));
+  const categoriesList = categories && categories.map(category => ({
+    id: category.id,
+    name: category.name,
+    parent: category.parent
   }));
   const onChangeImageSize = newSize => {
     setAttributes({
@@ -94,6 +104,11 @@ function Edit({
       order: newOrder
     });
   };
+  const handleOnCategoryChange = newCategory => {
+    setAttributes({
+      category: Number(newCategory)
+    });
+  };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("ul", {
     ...(0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useBlockProps)(),
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InspectorControls, {
@@ -113,7 +128,10 @@ function Edit({
           order: order,
           orderBy: orderBy,
           onOrderChange: handleOrderChange,
-          onOrderByChange: handleOrderByChange
+          onOrderByChange: handleOrderByChange,
+          categoriesList: categoriesList,
+          selectedCategoryId: category,
+          onCategoryChange: handleOnCategoryChange
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
           label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_5__.__)("Image Size", "sp-dynamic-posts"),
           options: imageSizeOptions,

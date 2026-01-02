@@ -31,8 +31,14 @@ function create_block_sp_dynamic_posts_block_init()
 
 function render_sp_dynamic_posts_block($attributes)
 {
-	$arg = array('posts_per_page' => $attributes['numberOfPosts'], 'post_status' => 'publish', 'order' => $attributes['order'], 'orderby' => $attributes['orderBy']);
-	$recent_posts = get_posts($arg);
+	$args = array('posts_per_page' => $attributes['numberOfPosts'], 'post_status' => 'publish', 'order' => $attributes['order'], 'orderby' => $attributes['orderBy']);
+	$category = $attributes['category'] ?? 0;
+
+	if ($category) {
+		$args['cat'] = $category;
+	}
+
+	$recent_posts = get_posts($args);
 
 	$posts = "<ul " . get_block_wrapper_attributes() . ">";
 	foreach ($recent_posts as $post) {
@@ -43,7 +49,7 @@ function render_sp_dynamic_posts_block($attributes)
 			$title = esc_html($title);
 		}
 		$permalink = get_the_permalink($post);
-		$excerpt = get_the_excerpt($post);
+		$excerpt = esc_html(get_the_excerpt($post));
 
 		$posts .= "<li>";
 

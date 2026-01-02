@@ -13,8 +13,14 @@ import { __ } from "@wordpress/i18n";
 import "./editor.scss";
 
 export default function Edit({ attributes, setAttributes }) {
-	const { numberOfPosts, displayFeaturedImage, imageSize, order, orderBy } =
-		attributes;
+	const {
+		numberOfPosts,
+		displayFeaturedImage,
+		imageSize,
+		order,
+		orderBy,
+		category,
+	} = attributes;
 
 	const posts = useSelect(
 		(select) => {
@@ -23,9 +29,10 @@ export default function Edit({ attributes, setAttributes }) {
 				_embed: displayFeaturedImage,
 				order,
 				orderby: orderBy,
+				categories: [category],
 			});
 		},
-		[numberOfPosts, order, orderBy],
+		[numberOfPosts, order, orderBy, category],
 	);
 
 	const imageSizes = useSelect(
@@ -37,6 +44,17 @@ export default function Edit({ attributes, setAttributes }) {
 		label: size.name,
 		value: size.slug,
 	}));
+
+	const categories = useSelect((select) =>
+		select("core").getEntityRecords("taxonomy", "category", { per_page: -1 }),
+	);
+	const categoriesList =
+		categories &&
+		categories.map((category) => ({
+			id: category.id,
+			name: category.name,
+			parent: category.parent,
+		}));
 
 	const onChangeImageSize = (newSize) => {
 		setAttributes({ imageSize: newSize });
@@ -55,6 +73,10 @@ export default function Edit({ attributes, setAttributes }) {
 	};
 	const handleOrderChange = (newOrder) => {
 		setAttributes({ order: newOrder });
+	};
+
+	const handleOnCategoryChange = (newCategory) => {
+		setAttributes({ category: Number(newCategory) });
 	};
 
 	return (
@@ -80,6 +102,9 @@ export default function Edit({ attributes, setAttributes }) {
 						orderBy={orderBy}
 						onOrderChange={handleOrderChange}
 						onOrderByChange={handleOrderByChange}
+						categoriesList={categoriesList}
+						selectedCategoryId={category}
+						onCategoryChange={handleOnCategoryChange}
 					/>
 
 					<SelectControl
